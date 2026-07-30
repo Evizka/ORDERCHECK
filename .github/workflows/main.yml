@@ -18,32 +18,9 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Ensure Gradle Wrapper Script Exists
+    - name: Generate Wrapper
       run: |
-        if [ ! -f ./gradlew ]; then
-          cat << 'EOF' > ./gradlew
-#!/usr/bin/env sh
-PRG="$0"
-while [ -h "$PRG" ] ; do
-    ls=`ls -ld "$PRG"`
-    link=`expr "$ls" : '.*-> \(.*\)$'`
-    if expr "$link" : '/.*' > /dev/null; then
-        PRG="$link"
-    else
-        PRG=`dirname "$PRG"`/"$link"
-    fi
-done
-SAVED="`pwd`"
-CDPATH=""
-cd "`dirname \"$PRG\"`/" >/dev/null
-APP_HOME="`pwd -P`"
-cd "$SAVED" >/dev/null
-CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
-JAVACMD="${JAVA_HOME:-java}/bin/java"
-if [ ! -x "$JAVACMD" ]; then JAVACMD="java"; fi
-exec "$JAVACMD" "-Dorg.gradle.appname=gradlew" -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"
-EOF
-        fi
+        gradle wrapper --gradle-version 8.4
         chmod +x ./gradlew
 
     - name: Build Debug APK
