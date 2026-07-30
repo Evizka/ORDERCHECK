@@ -50,6 +50,7 @@ class MainActivity : AppCompatActivity() {
 
         val etTgToken = findViewById<EditText>(R.id.et_tg_token)
         val etTgChatId = findViewById<EditText>(R.id.et_tg_chat_id)
+        val etBaseAddress = findViewById<EditText>(R.id.et_base_address)
         val etMaxRadius = findViewById<EditText>(R.id.et_max_radius)
         val etMinPrice = findViewById<EditText>(R.id.et_min_price)
         tvLog = findViewById(R.id.tv_log)
@@ -62,16 +63,18 @@ class MainActivity : AppCompatActivity() {
         // Load saved preferences
         etTgToken.setText(prefs.getString("tg_token", "8806599669:AAHmRoCfNl2JTOD-ZtBMbZWTrwrZrBkOZtE"))
         etTgChatId.setText(prefs.getString("tg_chat_id", "1787466306"))
-        etMaxRadius.setText(prefs.getFloat("max_radius", 50.0f).toString())
+        etBaseAddress.setText(prefs.getString("base_address", "Молодежная 54"))
+        etMaxRadius.setText(prefs.getFloat("max_radius", 5.0f).toString())
         etMinPrice.setText(prefs.getInt("min_price", 0).toString())
 
         btnSave.setOnClickListener {
-            val radius = etMaxRadius.text.toString().toFloatOrNull() ?: 50.0f
+            val radius = etMaxRadius.text.toString().toFloatOrNull() ?: 5.0f
             val price = etMinPrice.text.toString().toIntOrNull() ?: 0
 
             prefs.edit().apply {
                 putString("tg_token", etTgToken.text.toString().trim())
                 putString("tg_chat_id", etTgChatId.text.toString().trim())
+                putString("base_address", etBaseAddress.text.toString().trim())
                 putFloat("max_radius", radius)
                 putInt("min_price", price)
                 apply()
@@ -87,7 +90,7 @@ class MainActivity : AppCompatActivity() {
                 id = "test_${System.currentTimeMillis()}",
                 distanceKm = 1.2,
                 price = 500,
-                rawText = "ТЕСТОВЫЙ ЗАКАЗ\nМосква, ул. Тверская 1 -> ул. Арбат 10"
+                rawText = "ТЕСТОВЫЙ ЗАКАЗ\nМосква, ул. Молодежная 54 -> ул. Арбат 10"
             )
 
             CoroutineScope(Dispatchers.Main).launch {
@@ -142,7 +145,6 @@ class MainActivity : AppCompatActivity() {
             }
         } catch (_: Exception) {}
 
-        // Fallback check for Xiaomi / Samsung / MIUI short package format
         val settingValue = Settings.Secure.getString(contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES) ?: ""
         return settingValue.contains(packageName)
     }
