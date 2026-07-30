@@ -6,6 +6,9 @@ import org.json.JSONObject
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 object TelegramNotifier {
 
@@ -24,22 +27,33 @@ object TelegramNotifier {
             conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
             conn.doOutput = true
 
-            val formattedDistance = if (order.distanceKm < 1.0) {
-                "${(order.distanceKm * 1000).toInt()} м"
+            val timeStr = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+
+            val distanceStr = if (order.distanceKm > 0.0) {
+                if (order.distanceKm < 1.0) "${(order.distanceKm * 1000).toInt()} м" else "%.1f км".format(order.distanceKm)
             } else {
-                "%.1f км".format(order.distanceKm)
+                "Карта / Список"
+            }
+
+            val priceStr = if (order.price > 0) "${order.price} ₽" else "Указана на карте"
+
+            val tagHeader = if (order.isKeywordMatch) {
+                "⭐ *СОВПАДЕНИЕ ПО АДРЕСУ: '${order.matchedKeyword.uppercase()}'*"
+            } else {
+                "🚨 *СРОЧНЫЙ ЗАКАЗ В ДОСТАВИСТЕ!*"
             }
 
             val messageText = """
-                🚀 *НОВЫЙ ЗАКАЗ В ДОСТАВИСТЕ!*
+                $tagHeader
                 
-                💰 *Оплата:* ${order.price} ₽
-                📍 *Расстояние:* $formattedDistance
+                💰 *Оплата:* $priceStr
+                📍 *Расстояние:* $distanceStr
+                ⏱ *Время:* $timeStr
                 
-                📄 *Детали:*
-                ${order.rawText.take(300)}
+                📄 *Детали элемента:*
+                `${order.rawText.take(250)}`
                 
-                ⏱ _Отправлено автоматически через Courier Monitor_
+                ⚡ _Отправлено автоматически через Courier Monitor_
             """.trimIndent()
 
             val jsonBody = JSONObject().apply {
