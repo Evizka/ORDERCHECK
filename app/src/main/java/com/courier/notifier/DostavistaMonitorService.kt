@@ -30,11 +30,9 @@ class DostavistaMonitorService : AccessibilityService() {
             val textBlocks = mutableListOf<String>()
             collectTextNodes(rootNode, textBlocks)
 
-            sendDiagnosticLog("⚡ Сканирование... Пакет: $pkgName | Узлов: ${textBlocks.size}")
-
             if (textBlocks.isEmpty()) return
 
-            processTexts(textBlocks)
+            processTexts(textBlocks, pkgName)
         } catch (e: Exception) {
             sendDiagnosticLog("❌ Ошибка: ${e.message}")
         } finally {
@@ -44,7 +42,7 @@ class DostavistaMonitorService : AccessibilityService() {
         }
     }
 
-    private fun processTexts(textBlocks: List<String>) {
+    private fun processTexts(textBlocks: List<String>, pkgName: String) {
         val prefs = getSharedPreferences("courier_prefs", Context.MODE_PRIVATE)
         val maxRadiusKm = prefs.getFloat("max_radius", 50.0f).toDouble()
         val minPrice = prefs.getInt("min_price", 0)
@@ -55,14 +53,20 @@ class DostavistaMonitorService : AccessibilityService() {
         if (telegramToken.isBlank() || telegramChatId.isBlank()) return
 
         val fullScreenText = textBlocks.joinToString("\n")
-        val parsedPrice = OrderParser.parsePrice(fullScreenText) ?: 0
+        var parsedPrice = OrderParser.parsePrice(fullScreenText) ?: 0
+
+        // If price could not be extracted from screen, don't let it block notification if minPrice is set
+        val effectivePrice = if (parsedPrice == 0 && minPrice > 0) minPrice else parsedPrice
+
+        var foundAnyDistance = false
 
         for (text in textBlocks) {
             val distanceKm = OrderParser.parseDistanceKm(text) ?: continue
+            foundAnyDistance = true
 
-            sendDiagnosticLog("📍 Расстояние: $text | Оплата: $parsedPrice ₽")
+            sendDiagnosticLog("📍 Вижу расстояние: '$text' ($distanceKm км) | Оплата: $parsedPrice ₽")
 
-            if (distanceKm <= maxRadiusKm && parsedPrice >= minPrice) {
+            if (distanceKm <= maxRadiusKm && effectivePrice >= minPrice) {
                 val orderHash = OrderParser.generateOrderHash(distanceKm, parsedPrice, text)
 
                 if (!notifiedOrders.contains(orderHash)) {
@@ -76,13 +80,13 @@ class DostavistaMonitorService : AccessibilityService() {
                         rawText = text
                     )
 
-                    // 1. Воспроизвести громкий сигнал и вибрацию
+                    // 1. Воспроизвести звук и вибрацию
                     triggerAlertSoundAndVibration()
 
-                    // 2. Логирование успеха
-                    sendDiagnosticLog("🎉 ЗАКАЗ НАЙДЕН! Отправка в Telegram...")
+                    // 2. Лог успеха в консоль
+                    sendDiagnosticLog("🎉 ПОДХОДИТ! $distanceKm км <= $maxRadiusKm км. Отправка в Telegram...")
 
-                    // 3. Сетевое уведомление
+                    // 3. Отправка в Telegram
                     serviceScope.launch {
                         TelegramNotifier.sendOrderNotification(telegramToken, telegramChatId, order)
                         if (discordWebhook.isNotBlank()) {
@@ -90,18 +94,22 @@ class DostavistaMonitorService : AccessibilityService() {
                         }
                     }
                 }
+            } else {
+                sendDiagnosticLog("⚠️ Заказ вне фильтра: $distanceKm км (макс $maxRadiusKm км)")
             }
+        }
+
+        if (!foundAnyDistance) {
+            sendDiagnosticLog("👀 Экран: $pkgName (${textBlocks.size} текстов). Ищу тексты с 'км' или 'м'...")
         }
     }
 
     private fun triggerAlertSoundAndVibration() {
         try {
-            // Звук уведомления
             val notificationUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
             val ringtone = RingtoneManager.getRingtone(applicationContext, notificationUri)
             ringtone?.play()
 
-            // Вибрация
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
                 val vibrator = vibratorManager.defaultVibrator
