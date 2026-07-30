@@ -23,7 +23,13 @@ class DostavistaMonitorService : AccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null) return
 
-        val pkgName = event.packageName?.toString() ?: "unknown"
+        val pkgName = event.packageName?.toString() ?: ""
+        
+        // STRICTLY TARGET DOSTAVISTA APP ONLY (com.sebbia.delivery)
+        if (pkgName != "com.sebbia.delivery" && !pkgName.contains("dostavista", ignoreCase = true)) {
+            return
+        }
+
         val rootNode = rootInActiveWindow ?: return
 
         try {
@@ -32,7 +38,7 @@ class DostavistaMonitorService : AccessibilityService() {
 
             if (textBlocks.isEmpty()) return
 
-            processTexts(textBlocks, pkgName)
+            processDostavistaScreen(textBlocks)
         } catch (e: Exception) {
             sendDiagnosticLog("❌ Ошибка: ${e.message}")
         } finally {
@@ -42,10 +48,11 @@ class DostavistaMonitorService : AccessibilityService() {
         }
     }
 
-    private fun processTexts(textBlocks: List<String>, pkgName: String) {
+    private fun processDostavistaScreen(textBlocks: List<String>) {
         val prefs = getSharedPreferences("courier_prefs", Context.MODE_PRIVATE)
-        val maxRadiusKm = prefs.getFloat("max_radius", 50.0f).toDouble()
+        val maxRadiusKm = prefs.getFloat("max_radius", 5.0f).toDouble()
         val minPrice = prefs.getInt("min_price", 0)
+        val targetKeyword = prefs.getString("base_address", "")?.trim()?.lowercase() ?: ""
         val telegramToken = prefs.getString("tg_token", "") ?: ""
         val telegramChatId = prefs.getString("tg_chat_id", "") ?: ""
         val discordWebhook = prefs.getString("discord_webhook", "") ?: ""
@@ -53,21 +60,20 @@ class DostavistaMonitorService : AccessibilityService() {
         if (telegramToken.isBlank() || telegramChatId.isBlank()) return
 
         val fullScreenText = textBlocks.joinToString("\n")
-        var parsedPrice = OrderParser.parsePrice(fullScreenText) ?: 0
-
-        // If price could not be extracted from screen, don't let it block notification if minPrice is set
+        val parsedPrice = OrderParser.parsePrice(fullScreenText) ?: 0
         val effectivePrice = if (parsedPrice == 0 && minPrice > 0) minPrice else parsedPrice
 
-        var foundAnyDistance = false
-
         for (text in textBlocks) {
-            val distanceKm = OrderParser.parseDistanceKm(text) ?: continue
-            foundAnyDistance = true
+            val distanceKm = OrderParser.parseDistanceKm(text)
+            val lowerText = text.lowercase()
 
-            sendDiagnosticLog("📍 Вижу расстояние: '$text' ($distanceKm км) | Оплата: $parsedPrice ₽")
+            // Check if text matches distance OR target address keyword (e.g. "молодежная")
+            val matchesAddress = targetKeyword.isNotEmpty() && lowerText.contains(targetKeyword)
+            val matchesDistance = distanceKm != null && distanceKm <= maxRadiusKm
 
-            if (distanceKm <= maxRadiusKm && effectivePrice >= minPrice) {
-                val orderHash = OrderParser.generateOrderHash(distanceKm, parsedPrice, text)
+            if (matchesAddress || matchesDistance) {
+                val actualDistance = distanceKm ?: 0.0
+                val orderHash = OrderParser.generateOrderHash(actualDistance, parsedPrice, text)
 
                 if (!notifiedOrders.contains(orderHash)) {
                     notifiedOrders.add(orderHash)
@@ -75,7 +81,7 @@ class DostavistaMonitorService : AccessibilityService() {
 
                     val order = OrderInfo(
                         id = orderHash,
-                        distanceKm = distanceKm,
+                        distanceKm = actualDistance,
                         price = parsedPrice,
                         rawText = text
                     )
@@ -83,8 +89,9 @@ class DostavistaMonitorService : AccessibilityService() {
                     // 1. Воспроизвести звук и вибрацию
                     triggerAlertSoundAndVibration()
 
-                    // 2. Лог успеха в консоль
-                    sendDiagnosticLog("🎉 ПОДХОДИТ! $distanceKm км <= $maxRadiusKm км. Отправка в Telegram...")
+                    // 2. Лог
+                    val matchType = if (matchesAddress) "улица '$targetKeyword'" else "$actualDistance км <= $maxRadiusKm км"
+                    sendDiagnosticLog("🎉 ЗАКАЗ НАЙДЕН ($matchType)! Отправка в Telegram...")
 
                     // 3. Отправка в Telegram
                     serviceScope.launch {
@@ -94,13 +101,7 @@ class DostavistaMonitorService : AccessibilityService() {
                         }
                     }
                 }
-            } else {
-                sendDiagnosticLog("⚠️ Заказ вне фильтра: $distanceKm км (макс $maxRadiusKm км)")
             }
-        }
-
-        if (!foundAnyDistance) {
-            sendDiagnosticLog("👀 Экран: $pkgName (${textBlocks.size} текстов). Ищу тексты с 'км' или 'м'...")
         }
     }
 
