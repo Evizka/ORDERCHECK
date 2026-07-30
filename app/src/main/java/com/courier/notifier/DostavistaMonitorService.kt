@@ -25,8 +25,8 @@ class DostavistaMonitorService : AccessibilityService() {
 
         val pkgName = event.packageName?.toString() ?: ""
         
-        // STRICTLY TARGET DOSTAVISTA APP ONLY (com.sebbia.delivery)
-        if (pkgName != "com.sebbia.delivery" && !pkgName.contains("dostavista", ignoreCase = true)) {
+        // STRICTLY AND ONLY TARGET DOSTAVISTA (com.sebbia.delivery)
+        if (pkgName != "com.sebbia.delivery") {
             return
         }
 
@@ -59,21 +59,20 @@ class DostavistaMonitorService : AccessibilityService() {
 
         if (telegramToken.isBlank() || telegramChatId.isBlank()) return
 
-        val fullScreenText = textBlocks.joinToString("\n")
-        val parsedPrice = OrderParser.parsePrice(fullScreenText) ?: 0
-        val effectivePrice = if (parsedPrice == 0 && minPrice > 0) minPrice else parsedPrice
-
         for (text in textBlocks) {
+            val price = OrderParser.parsePrice(text)
             val distanceKm = OrderParser.parseDistanceKm(text)
             val lowerText = text.lowercase()
 
-            // Check if text matches distance OR target address keyword (e.g. "молодежная")
-            val matchesAddress = targetKeyword.isNotEmpty() && lowerText.contains(targetKeyword)
+            val matchesPrice = price != null && price >= minPrice && price > 50
+            val matchesKeyword = targetKeyword.isNotEmpty() && lowerText.contains(targetKeyword)
             val matchesDistance = distanceKm != null && distanceKm <= maxRadiusKm
 
-            if (matchesAddress || matchesDistance) {
+            if (matchesPrice || matchesKeyword || matchesDistance) {
+                val actualPrice = price ?: OrderParser.parsePrice(textBlocks.joinToString("\n")) ?: 0
                 val actualDistance = distanceKm ?: 0.0
-                val orderHash = OrderParser.generateOrderHash(actualDistance, parsedPrice, text)
+
+                val orderHash = OrderParser.generateOrderHash(actualDistance, actualPrice, text)
 
                 if (!notifiedOrders.contains(orderHash)) {
                     notifiedOrders.add(orderHash)
@@ -82,7 +81,7 @@ class DostavistaMonitorService : AccessibilityService() {
                     val order = OrderInfo(
                         id = orderHash,
                         distanceKm = actualDistance,
-                        price = parsedPrice,
+                        price = actualPrice,
                         rawText = text
                     )
 
@@ -90,8 +89,7 @@ class DostavistaMonitorService : AccessibilityService() {
                     triggerAlertSoundAndVibration()
 
                     // 2. Лог
-                    val matchType = if (matchesAddress) "улица '$targetKeyword'" else "$actualDistance км <= $maxRadiusKm км"
-                    sendDiagnosticLog("🎉 ЗАКАЗ НАЙДЕН ($matchType)! Отправка в Telegram...")
+                    sendDiagnosticLog("🎉 ЗАКАЗ ДОСТАВИСТА ($actualPrice ₽)! Отправка в Telegram...")
 
                     // 3. Отправка в Telegram
                     serviceScope.launch {
