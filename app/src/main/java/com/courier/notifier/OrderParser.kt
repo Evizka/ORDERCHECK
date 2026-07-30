@@ -7,14 +7,14 @@ data class OrderInfo(
     val distanceKm: Double,
     val price: Int,
     val rawText: String,
-    val pickupAddress: String = "",
-    val deliveryAddress: String = ""
+    val isKeywordMatch: Boolean = false,
+    val matchedKeyword: String = ""
 )
 
 object OrderParser {
 
     /**
-     * Parses distance in kilometers from strings like "1,5 км", "800 м", "2.4 km", "до 3 км", "забор 500м".
+     * Parses distance in kilometers from strings like "1,5 км", "800 м", "2.4 km", "до 3 км", "1.23 км от станции".
      */
     fun parseDistanceKm(text: String): Double? {
         if (text.isBlank()) return null
@@ -29,7 +29,7 @@ object OrderParser {
             if (meters != null) return meters / 1000.0
         }
 
-        // Match kilometers, e.g., "1.5 км", "2,4км", "0.8km", "до 3.5 км"
+        // Match kilometers, e.g., "1.5 км", "2,4км", "0.8km", "1.23 км"
         val kmMatcher = Pattern.compile("(\\d+(?:\\.\\d+)?)\\s*(?:км|km)").matcher(normalized)
         if (kmMatcher.find()) {
             return kmMatcher.group(1)?.toDoubleOrNull()
@@ -39,22 +39,20 @@ object OrderParser {
     }
 
     /**
-     * Parses price in RUB from strings like "450 ₽", "1 200 руб", "350р", "500".
-     * Replaces non-breaking spaces and handles 3 to 6 digit payouts.
+     * Parses price in RUB from strings like "127 ₽", "до 133 ₽", "264 ₽", "302 ₽", "450руб".
      */
     fun parsePrice(text: String): Int? {
         if (text.isBlank()) return null
-        // Clean all whitespace variations and unicode non-breaking spaces
         val cleaned = text.replace("[\\s\\u00A0\\u2007\\u202F]+".toRegex(), "")
 
-        // Match explicit currency formats, e.g., "450₽", "1200руб", "350р"
+        // Match explicit currency formats, e.g., "127₽", "до133₽", "302₽", "450руб"
         val currencyMatcher = Pattern.compile("(\\d+)(?:₽|руб|р)").matcher(cleaned)
         if (currencyMatcher.find()) {
             val price = currencyMatcher.group(1)?.toIntOrNull()
             if (price != null && price in 50..100000) return price
         }
 
-        // Fallback: match standalone numbers between 100 and 50000 (typical courier payouts)
+        // Fallback: match standalone numbers between 100 and 50000
         val standaloneMatcher = Pattern.compile("\\b(\\d{3,5})\\b").matcher(cleaned)
         if (standaloneMatcher.find()) {
             val price = standaloneMatcher.group(1)?.toIntOrNull()
@@ -62,6 +60,22 @@ object OrderParser {
         }
 
         return null
+    }
+
+    /**
+     * Checks if text contains any of the comma-separated keywords (e.g. "Молодежная 54, Химки, Путилково").
+     */
+    fun checkKeywords(text: String, keywordsCsv: String): Pair<Boolean, String> {
+        if (keywordsCsv.isBlank() || text.isBlank()) return Pair(false, "")
+        val lowerText = text.lowercase()
+        val keywords = keywordsCsv.split(",").map { it.trim().lowercase() }.filter { it.isNotEmpty() }
+
+        for (kw in keywords) {
+            if (lowerText.contains(kw)) {
+                return Pair(true, kw)
+            }
+        }
+        return Pair(false, "")
     }
 
     /**
