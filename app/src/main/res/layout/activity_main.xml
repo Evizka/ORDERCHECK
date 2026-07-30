@@ -2,103 +2,235 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="20dp">
+    android:background="#0F172A"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="20dp">
 
-        <TextView
+        <!-- App Header -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="🚀 Courier Monitor (Достависта)"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:layout_marginBottom="20dp">
 
-        <!-- Telegram Settings -->
-        <TextView
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="⚡ Courier Monitor"
+                android:textColor="#F8FAFC"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_status_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#1E293B"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="6dp"
+                android:text="🔴 Служба выключена"
+                android:textColor="#F43F5E"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Telegram Card -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Настройки Telegram Bot"
-            android:textStyle="bold"
-            android:textSize="16sp" />
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp">
 
-        <EditText
-            android:id="@+id/et_tg_token"
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🤖 Telegram Бот"
+                android:textColor="#38BDF8"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Bot Token"
+                android:textColor="#94A3B8"
+                android:textSize="12sp" />
+
+            <EditText
+                android:id="@+id/et_tg_token"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_input"
+                android:hint="8806599669:AAH..."
+                android:textColorHint="#475569"
+                android:textColor="#F8FAFC"
+                android:paddingHorizontal="12dp"
+                android:inputType="text"
+                android:textSize="14sp"
+                android:layout_marginBottom="10dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Chat ID"
+                android:textColor="#94A3B8"
+                android:textSize="12sp" />
+
+            <EditText
+                android:id="@+id/et_tg_chat_id"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_input"
+                android:hint="1787466306"
+                android:textColorHint="#475569"
+                android:textColor="#F8FAFC"
+                android:paddingHorizontal="12dp"
+                android:inputType="text"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <!-- Filters Card -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Telegram Bot Token (из @BotFather)"
-            android:inputType="text" />
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginBottom="20dp">
 
-        <EditText
-            android:id="@+id/et_tg_chat_id"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Telegram Chat ID (из @userinfobot)"
-            android:inputType="text"
-            android:layout_marginBottom="16dp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🎯 Фильтры Заказов"
+                android:textColor="#818CF8"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp" />
 
-        <!-- Discord Settings -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Настройки Discord Webhook"
-            android:textStyle="bold"
-            android:textSize="16sp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
-        <EditText
-            android:id="@+id/et_discord_webhook"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Discord Webhook URL (опционально)"
-            android:inputType="textUri"
-            android:layout_marginBottom="16dp" />
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="8dp">
 
-        <!-- Order Filters -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Фильтры заказов"
-            android:textStyle="bold"
-            android:textSize="16sp" />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Макс. радиус (км)"
+                        android:textColor="#94A3B8"
+                        android:textSize="12sp" />
 
-        <EditText
-            android:id="@+id/et_max_radius"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Макс. радиус (км), напр. 3.0"
-            android:inputType="numberDecimal" />
+                    <EditText
+                        android:id="@+id/et_max_radius"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_input"
+                        android:hint="3.0"
+                        android:textColorHint="#475569"
+                        android:textColor="#F8FAFC"
+                        android:paddingHorizontal="12dp"
+                        android:inputType="numberDecimal"
+                        android:textSize="14sp" />
+                </LinearLayout>
 
-        <EditText
-            android:id="@+id/et_min_price"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Мин. цена (руб), напр. 400"
-            android:inputType="number"
-            android:layout_marginBottom="20dp" />
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="8dp">
 
-        <!-- Action Buttons -->
-        <Button
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Мин. цена (руб)"
+                        android:textColor="#94A3B8"
+                        android:textSize="12sp" />
+
+                    <EditText
+                        android:id="@+id/et_min_price"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_input"
+                        android:hint="300"
+                        android:textColorHint="#475569"
+                        android:textColor="#F8FAFC"
+                        android:paddingHorizontal="12dp"
+                        android:inputType="number"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Actions -->
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_save"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="💾 Сохранить настройки" />
+            android:layout_height="52dp"
+            android:background="@drawable/bg_button_primary"
+            android:text="💾 Сохранить настройки"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="10dp" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_test"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="🧪 Отправить тестовое сообщение"
-            android:layout_marginTop="8dp" />
+            android:layout_height="48dp"
+            android:background="@drawable/bg_button_secondary"
+            android:text="🧪 Тест Telegram сообщения"
+            android:textColor="#E2E8F0"
+            android:textSize="14sp"
+            android:layout_marginBottom="10dp" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_open_accessibility"
             android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_button_secondary"
+            android:text="⚙️ Включить службу в настройках Android"
+            android:textColor="#E2E8F0"
+            android:textSize="14sp"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Console Section -->
+        <TextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="⚙️ Включить службу спец. возможностей"
-            android:layout_marginTop="16dp" />
+            android:text="📟 Сканер экрана (Консоль):"
+            android:textColor="#94A3B8"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tv_log"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:background="@drawable/bg_console"
+            android:padding="12dp"
+            android:textColor="#34D399"
+            android:textSize="12sp"
+            android:fontFamily="monospace"
+            android:scrollbars="vertical"
+            android:text="[--:--:--] Монитор сканирования готов...\n" />
 
     </LinearLayout>
 </ScrollView>
