@@ -26,6 +26,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var tvLog: TextView
     private lateinit var tvStatusBadge: TextView
+    private lateinit var tvAppVersion: TextView
     private val logBuffer = StringBuilder()
 
     private val logReceiver = object : BroadcastReceiver() {
@@ -55,10 +56,19 @@ class MainActivity : AppCompatActivity() {
         val etMinPrice = findViewById<EditText>(R.id.et_min_price)
         tvLog = findViewById(R.id.tv_log)
         tvStatusBadge = findViewById(R.id.tv_status_badge)
+        tvAppVersion = findViewById(R.id.tv_app_version)
 
         val btnSave = findViewById<Button>(R.id.btn_save)
         val btnTest = findViewById<Button>(R.id.btn_test)
         val btnOpenAccessibility = findViewById<Button>(R.id.btn_open_accessibility)
+
+        // Set version label dynamically
+        try {
+            val pInfo = packageManager.getPackageInfo(packageName, 0)
+            tvAppVersion.text = "v${pInfo.versionName} (Build ${pInfo.versionCode}) • Courier Monitor Pro"
+        } catch (_: Exception) {
+            tvAppVersion.text = "v1.0.4 • Courier Monitor Pro"
+        }
 
         // Load saved preferences
         etTgToken.setText(prefs.getString("tg_token", "8806599669:AAHmRoCfNl2JTOD-ZtBMbZWTrwrZrBkOZtE"))
