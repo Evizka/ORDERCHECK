@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🚀 Courier Monitor (Достависта)"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Telegram Settings -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Настройки Telegram Bot"
+            android:textStyle="bold"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/et_tg_token"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Telegram Bot Token (из @BotFather)"
+            android:inputType="text" />
+
+        <EditText
+            android:id="@+id/et_tg_chat_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Telegram Chat ID (из @userinfobot)"
+            android:inputType="text"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Discord Settings -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Настройки Discord Webhook"
+            android:textStyle="bold"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/et_discord_webhook"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Discord Webhook URL (опционально)"
+            android:inputType="textUri"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Order Filters -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Фильтры заказов"
+            android:textStyle="bold"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/et_max_radius"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Макс. радиус (км), напр. 3.0"
+            android:inputType="numberDecimal" />
+
+        <EditText
+            android:id="@+id/et_min_price"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Мин. цена (руб), напр. 400"
+            android:inputType="number"
+            android:layout_marginBottom="20dp" />
+
+        <!-- Action Buttons -->
+        <Button
+            android:id="@+id/btn_save"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="💾 Сохранить настройки" />
+
+        <Button
+            android:id="@+id/btn_test"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🧪 Отправить тестовое сообщение"
+            android:layout_marginTop="8dp" />
+
+        <Button
+            android:id="@+id/btn_open_accessibility"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="⚙️ Включить службу спец. возможностей"
+            android:layout_marginTop="16dp" />
+
+    </LinearLayout>
+</ScrollView>

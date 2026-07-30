@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Courier Monitor</string>
+    <string name="accessibility_service_description">Мониторинг заказов Достависта для отправки уведомлений в Telegram/Discord.</string>
+</resources>
