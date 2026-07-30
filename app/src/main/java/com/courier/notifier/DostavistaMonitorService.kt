@@ -21,28 +21,32 @@ import kotlinx.coroutines.launch
 class DostavistaMonitorService : AccessibilityService() {
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private val notifiedOrders = mutableSetOf<String>()
+    private val notifiedOrders = mutableMapOf<String, Long>()
     private val mainHandler = Handler(Looper.getMainLooper())
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null) return
 
-        val pkgName = event.packageName?.toString() ?: ""
-        
-        // STRICTLY AND ONLY TARGET DOSTAVISTA (com.sebbia.delivery)
-        if (pkgName != "com.sebbia.delivery") {
+        val rootNode = rootInActiveWindow ?: return
+        val activePkg = rootNode.packageName?.toString() ?: event.packageName?.toString() ?: ""
+
+        // Target Dostavista app (com.sebbia.delivery or dostavista)
+        val isDostavista = activePkg.contains("sebbia", ignoreCase = true) || 
+                           activePkg.contains("dostavista", ignoreCase = true)
+
+        if (!isDostavista) {
+            try { rootNode.recycle() } catch (_: Exception) {}
             return
         }
-
-        val rootNode = rootInActiveWindow ?: return
 
         try {
             val textBlocks = mutableListOf<String>()
             collectTextNodes(rootNode, textBlocks)
 
-            if (textBlocks.isEmpty()) return
-
-            processDostavistaScreen(textBlocks)
+            if (textBlocks.isNotEmpty()) {
+                sendDiagnosticLog("📱 Достависта активна (${textBlocks.size} блоков). Сканирую...")
+                processDostavistaScreen(textBlocks)
+            }
         } catch (e: Exception) {
             sendDiagnosticLog("❌ Ошибка: ${e.message}")
         } finally {
@@ -63,6 +67,10 @@ class DostavistaMonitorService : AccessibilityService() {
 
         if (telegramToken.isBlank() || telegramChatId.isBlank()) return
 
+        val now = System.currentTimeMillis()
+        // Expire hashes older than 3 minutes so new orders are never blocked
+        notifiedOrders.entries.removeIf { (now - it.value) > 180_000 }
+
         for (text in textBlocks) {
             val price = OrderParser.parsePrice(text)
             val distanceKm = OrderParser.parseDistanceKm(text)
@@ -77,9 +85,8 @@ class DostavistaMonitorService : AccessibilityService() {
 
                 val orderHash = OrderParser.generateOrderHash(actualDistance, actualPrice, text)
 
-                if (!notifiedOrders.contains(orderHash)) {
-                    notifiedOrders.add(orderHash)
-                    if (notifiedOrders.size > 300) notifiedOrders.clear()
+                if (!notifiedOrders.containsKey(orderHash)) {
+                    notifiedOrders[orderHash] = now
 
                     val order = OrderInfo(
                         id = orderHash,
@@ -90,15 +97,15 @@ class DostavistaMonitorService : AccessibilityService() {
                         matchedKeyword = matchedKw
                     )
 
-                    // 1. Двойной звуковой сигнал и тройная импульсная вибрация
+                    // 1. Двойной звуковой сигнал и вибрация
                     triggerIntenseAlertSignal()
 
-                    // 2. Всплывающее баннер-уведомление поверх экрана Достависты
+                    // 2. Наэкранный баннер
                     showScreenToast(actualPrice, actualDistance, matchedKw)
 
-                    // 3. Логирование в консоль
-                    val reason = if (isKwMatch) "Ключевое слово '$matchedKw'" else if (matchesPrice) "Оплата $actualPrice ₽ >= $minPrice ₽" else "$actualDistance км <= $maxRadiusKm км"
-                    sendDiagnosticLog("🎉 ЗАКАЗ ДОСТАВИСТА ($reason)! Отправка в Telegram...")
+                    // 3. Лог в консоль
+                    val reason = if (isKwMatch) "Улица '$matchedKw'" else if (matchesPrice) "Цена $actualPrice ₽ >= $minPrice ₽" else "$actualDistance км <= $maxRadiusKm км"
+                    sendDiagnosticLog("🎉 НАЙДЕН ЗАКАЗ ($reason)! Отправляю в Telegram...")
 
                     // 4. Отправка в Telegram
                     serviceScope.launch {
@@ -122,12 +129,10 @@ class DostavistaMonitorService : AccessibilityService() {
 
     private fun triggerIntenseAlertSignal() {
         try {
-            // Звуковой сигнал
             val notificationUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
             val ringtone = RingtoneManager.getRingtone(applicationContext, notificationUri)
             ringtone?.play()
 
-            // Тройная импульсная вибрация (не пропустишь!)
             val pattern = longArrayOf(0, 400, 150, 400, 150, 400)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
