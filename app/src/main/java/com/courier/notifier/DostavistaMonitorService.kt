@@ -23,6 +23,9 @@ class DostavistaMonitorService : AccessibilityService() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val notifiedOrders = mutableMapOf<String, Long>()
     private val mainHandler = Handler(Looper.getMainLooper())
+    
+    private var totalDetectedCount = 0
+    private var maxPriceToday = 0
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null) return
@@ -30,7 +33,6 @@ class DostavistaMonitorService : AccessibilityService() {
         val rootNode = rootInActiveWindow ?: return
         val activePkg = rootNode.packageName?.toString() ?: event.packageName?.toString() ?: ""
 
-        // Target Dostavista app (com.sebbia.delivery or dostavista)
         val isDostavista = activePkg.contains("sebbia", ignoreCase = true) || 
                            activePkg.contains("dostavista", ignoreCase = true)
 
@@ -68,7 +70,6 @@ class DostavistaMonitorService : AccessibilityService() {
         if (telegramToken.isBlank() || telegramChatId.isBlank()) return
 
         val now = System.currentTimeMillis()
-        // Expire hashes older than 3 minutes so new orders are never blocked
         notifiedOrders.entries.removeIf { (now - it.value) > 180_000 }
 
         for (text in textBlocks) {
@@ -88,6 +89,14 @@ class DostavistaMonitorService : AccessibilityService() {
                 if (!notifiedOrders.containsKey(orderHash)) {
                     notifiedOrders[orderHash] = now
 
+                    totalDetectedCount++
+                    if (actualPrice > maxPriceToday) {
+                        maxPriceToday = actualPrice
+                    }
+
+                    // Send updated stats to MainActivity
+                    sendStatsUpdate(totalDetectedCount, maxPriceToday)
+
                     val order = OrderInfo(
                         id = orderHash,
                         distanceKm = actualDistance,
@@ -105,7 +114,7 @@ class DostavistaMonitorService : AccessibilityService() {
 
                     // 3. Лог в консоль
                     val reason = if (isKwMatch) "Улица '$matchedKw'" else if (matchesPrice) "Цена $actualPrice ₽ >= $minPrice ₽" else "$actualDistance км <= $maxRadiusKm км"
-                    sendDiagnosticLog("🎉 НАЙДЕН ЗАКАЗ ($reason)! Отправляю в Telegram...")
+                    sendDiagnosticLog("🎉 НАЙДЕН ЗАКАЗ ($reason)! Отправка в Telegram...")
 
                     // 4. Отправка в Telegram
                     serviceScope.launch {
@@ -178,6 +187,13 @@ class DostavistaMonitorService : AccessibilityService() {
     private fun sendDiagnosticLog(msg: String) {
         val intent = Intent("com.courier.notifier.LOG_UPDATE")
         intent.putExtra("log_message", msg)
+        sendBroadcast(intent)
+    }
+
+    private fun sendStatsUpdate(total: Int, maxPrice: Int) {
+        val intent = Intent("com.courier.notifier.STATS_UPDATE")
+        intent.putExtra("total_count", total)
+        intent.putExtra("max_price", maxPrice)
         sendBroadcast(intent)
     }
 
