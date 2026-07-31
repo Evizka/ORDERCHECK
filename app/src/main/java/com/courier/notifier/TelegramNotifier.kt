@@ -30,12 +30,14 @@ object TelegramNotifier {
             val timeStr = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
 
             val distanceStr = if (order.distanceKm > 0.0) {
-                if (order.distanceKm < 1.0) "${(order.distanceKm * 1000).toInt()} м" else "%.1f км".format(order.distanceKm)
+                if (order.distanceKm < 1.0) "${(order.distanceKm * 1000).toInt()} м от вас" else "%.1f км от вас".format(order.distanceKm)
+            } else if (order.isKeywordMatch) {
+                "📍 Рядом с вашей улицей ('${order.matchedKeyword.uppercase()}')"
             } else {
-                "Карта / Список"
+                "📍 ~ Из вашей зоны (Карта Достависта)"
             }
 
-            val priceStr = if (order.price > 0) "${order.price} ₽" else "Указана на карте"
+            val priceStr = if (order.price > 0) "${order.price} ₽" else "Указана на карточке"
 
             val tagHeader = if (order.isKeywordMatch) {
                 "⭐ *СОВПАДЕНИЕ ПО АДРЕСУ: '${order.matchedKeyword.uppercase()}'*"
@@ -47,13 +49,13 @@ object TelegramNotifier {
                 $tagHeader
                 
                 💰 *Оплата:* $priceStr
-                📍 *Расстояние:* $distanceStr
+                📍 *Дистанция:* $distanceStr
                 ⏱ *Время:* $timeStr
                 
-                📄 *Детали элемента:*
+                📄 *Детали:*
                 `${order.rawText.take(250)}`
                 
-                ⚡ _Отправлено автоматически через Courier Monitor_
+                ⚡ _Отправлено автоматически через Courier Monitor Pro_
             """.trimIndent()
 
             val jsonBody = JSONObject().apply {
