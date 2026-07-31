@@ -18,6 +18,9 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v3
+
     - name: Setup Gradle 8.4
       uses: gradle/actions/setup-gradle@v4
       with:
