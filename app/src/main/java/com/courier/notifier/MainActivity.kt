@@ -6,8 +6,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
+import android.media.RingtoneManager
 import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
 import android.widget.Button
@@ -30,12 +34,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvStatTotal: TextView
     private lateinit var tvStatMaxPrice: TextView
 
+    private lateinit var etBaseAddress: EditText
+
     private val logBuffer = StringBuilder()
 
     private val logReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent == null) return
-            
+
             if (intent.action == "com.courier.notifier.LOG_UPDATE") {
                 val msg = intent.getStringExtra("log_message") ?: return
                 val time = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
@@ -63,10 +69,10 @@ class MainActivity : AppCompatActivity() {
 
         val etTgToken = findViewById<EditText>(R.id.et_tg_token)
         val etTgChatId = findViewById<EditText>(R.id.et_tg_chat_id)
-        val etBaseAddress = findViewById<EditText>(R.id.et_base_address)
+        etBaseAddress = findViewById(R.id.et_base_address)
         val etMaxRadius = findViewById<EditText>(R.id.et_max_radius)
         val etMinPrice = findViewById<EditText>(R.id.et_min_price)
-        
+
         tvLog = findViewById(R.id.tv_log)
         tvStatusBadge = findViewById(R.id.tv_status_badge)
         tvAppVersion = findViewById(R.id.tv_app_version)
@@ -74,15 +80,28 @@ class MainActivity : AppCompatActivity() {
         tvStatMaxPrice = findViewById(R.id.tv_stat_max_price)
 
         val btnSave = findViewById<Button>(R.id.btn_save)
-        val btnTest = findViewById<Button>(R.id.btn_test)
+        val btnTestTg = findViewById<Button>(R.id.btn_test_tg)
+        val btnTestSound = findViewById<Button>(R.id.btn_test_sound)
+        val btnTestVibe = findViewById<Button>(R.id.btn_test_vibe)
         val btnOpenAccessibility = findViewById<Button>(R.id.btn_open_accessibility)
+
+        // Preset Chips
+        val chipMolodezhnaya = findViewById<TextView>(R.id.chip_molodezhnaya)
+        val chipKhimki = findViewById<TextView>(R.id.chip_khimki)
+        val chipKurkino = findViewById<TextView>(R.id.chip_kurkino)
+        val chipPutilkovo = findViewById<TextView>(R.id.chip_putilkovo)
+
+        chipMolodezhnaya.setOnClickListener { appendStreetPreset("Молодежная 54") }
+        chipKhimki.setOnClickListener { appendStreetPreset("Химки") }
+        chipKurkino.setOnClickListener { appendStreetPreset("Куркино") }
+        chipPutilkovo.setOnClickListener { appendStreetPreset("Путилково") }
 
         // Set version label dynamically
         try {
             val pInfo = packageManager.getPackageInfo(packageName, 0)
-            tvAppVersion.text = "v${pInfo.versionName} (Build ${pInfo.versionCode}) • Courier Monitor Pro"
+            tvAppVersion.text = "v${pInfo.versionName} (Build ${pInfo.versionCode}) • Courier Monitor iOS Glass"
         } catch (_: Exception) {
-            tvAppVersion.text = "v2.0.0 (Build 6) • Courier Monitor Pro"
+            tvAppVersion.text = "v3.0.0 (Build 7) • Courier Monitor iOS Glass"
         }
 
         // Load saved preferences
@@ -104,10 +123,10 @@ class MainActivity : AppCompatActivity() {
                 putInt("min_price", price)
                 apply()
             }
-            Toast.makeText(this, "✅ Настройки сохранены!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "✅ Конфигурация сохранена!", Toast.LENGTH_SHORT).show()
         }
 
-        btnTest.setOnClickListener {
+        btnTestTg.setOnClickListener {
             val token = etTgToken.text.toString().trim()
             val chatId = etTgChatId.text.toString().trim()
 
@@ -123,11 +142,40 @@ class MainActivity : AppCompatActivity() {
             CoroutineScope(Dispatchers.Main).launch {
                 val ok = TelegramNotifier.sendOrderNotification(token, chatId, dummyOrder)
                 if (ok) {
-                    Toast.makeText(this@MainActivity, "🎉 Тест отправлен в Telegram!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, "🎉 Сообщение отправлено в Telegram!", Toast.LENGTH_SHORT).show()
                 } else {
                     Toast.makeText(this@MainActivity, "❌ Ошибка! Проверьте Token / Chat ID", Toast.LENGTH_LONG).show()
                 }
             }
+        }
+
+        btnTestSound.setOnClickListener {
+            try {
+                val notificationUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+                val ringtone = RingtoneManager.getRingtone(applicationContext, notificationUri)
+                ringtone?.play()
+                Toast.makeText(this, "🔊 Тест звука проигран!", Toast.LENGTH_SHORT).show()
+            } catch (_: Exception) {}
+        }
+
+        btnTestVibe.setOnClickListener {
+            try {
+                val pattern = longArrayOf(0, 400, 150, 400, 150, 400)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                    vibratorManager.defaultVibrator.vibrate(VibrationEffect.createWaveform(pattern, -1))
+                } else {
+                    @Suppress("DEPRECATION")
+                    val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        vibrator.vibrate(VibrationEffect.createWaveform(pattern, -1))
+                    } else {
+                        @Suppress("DEPRECATION")
+                        vibrator.vibrate(pattern, -1)
+                    }
+                }
+                Toast.makeText(this, "📳 Вибросигнал сработал!", Toast.LENGTH_SHORT).show()
+            } catch (_: Exception) {}
         }
 
         btnOpenAccessibility.setOnClickListener {
@@ -145,6 +193,16 @@ class MainActivity : AppCompatActivity() {
         } else {
             registerReceiver(logReceiver, filter)
         }
+    }
+
+    private fun appendStreetPreset(streetName: String) {
+        val currentText = etBaseAddress.text.toString().trim()
+        if (currentText.isEmpty()) {
+            etBaseAddress.setText(streetName)
+        } else if (!currentText.contains(streetName, ignoreCase = true)) {
+            etBaseAddress.setText("$currentText, $streetName")
+        }
+        Toast.makeText(this, "➕ Добавлена улица: $streetName", Toast.LENGTH_SHORT).show()
     }
 
     override fun onResume() {
