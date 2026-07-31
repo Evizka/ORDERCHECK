@@ -27,19 +27,31 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvLog: TextView
     private lateinit var tvStatusBadge: TextView
     private lateinit var tvAppVersion: TextView
+    private lateinit var tvStatTotal: TextView
+    private lateinit var tvStatMaxPrice: TextView
+
     private val logBuffer = StringBuilder()
 
     private val logReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            val msg = intent?.getStringExtra("log_message") ?: return
-            val time = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
-            val formattedMsg = "[$time] $msg\n"
+            if (intent == null) return
+            
+            if (intent.action == "com.courier.notifier.LOG_UPDATE") {
+                val msg = intent.getStringExtra("log_message") ?: return
+                val time = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+                val formattedMsg = "[$time] $msg\n"
 
-            logBuffer.insert(0, formattedMsg)
-            if (logBuffer.length > 4000) {
-                logBuffer.setLength(4000)
+                logBuffer.insert(0, formattedMsg)
+                if (logBuffer.length > 4000) {
+                    logBuffer.setLength(4000)
+                }
+                tvLog.text = logBuffer.toString()
+            } else if (intent.action == "com.courier.notifier.STATS_UPDATE") {
+                val total = intent.getIntExtra("total_count", 0)
+                val maxPrice = intent.getIntExtra("max_price", 0)
+                tvStatTotal.text = total.toString()
+                tvStatMaxPrice.text = "$maxPrice ₽"
             }
-            tvLog.text = logBuffer.toString()
         }
     }
 
@@ -54,9 +66,12 @@ class MainActivity : AppCompatActivity() {
         val etBaseAddress = findViewById<EditText>(R.id.et_base_address)
         val etMaxRadius = findViewById<EditText>(R.id.et_max_radius)
         val etMinPrice = findViewById<EditText>(R.id.et_min_price)
+        
         tvLog = findViewById(R.id.tv_log)
         tvStatusBadge = findViewById(R.id.tv_status_badge)
         tvAppVersion = findViewById(R.id.tv_app_version)
+        tvStatTotal = findViewById(R.id.tv_stat_total)
+        tvStatMaxPrice = findViewById(R.id.tv_stat_max_price)
 
         val btnSave = findViewById<Button>(R.id.btn_save)
         val btnTest = findViewById<Button>(R.id.btn_test)
@@ -67,7 +82,7 @@ class MainActivity : AppCompatActivity() {
             val pInfo = packageManager.getPackageInfo(packageName, 0)
             tvAppVersion.text = "v${pInfo.versionName} (Build ${pInfo.versionCode}) • Courier Monitor Pro"
         } catch (_: Exception) {
-            tvAppVersion.text = "v1.0.4 • Courier Monitor Pro"
+            tvAppVersion.text = "v2.0.0 (Build 6) • Courier Monitor Pro"
         }
 
         // Load saved preferences
@@ -100,7 +115,9 @@ class MainActivity : AppCompatActivity() {
                 id = "test_${System.currentTimeMillis()}",
                 distanceKm = 1.2,
                 price = 500,
-                rawText = "ТЕСТОВЫЙ ЗАКАЗ\nМосква, ул. Молодежная 54 -> ул. Арбат 10"
+                rawText = "ТЕСТОВЫЙ ЗАКАЗ\nМосква, ул. Молодежная 54 -> ул. Арбат 10",
+                isKeywordMatch = true,
+                matchedKeyword = "молодежная"
             )
 
             CoroutineScope(Dispatchers.Main).launch {
@@ -118,7 +135,11 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        val filter = IntentFilter("com.courier.notifier.LOG_UPDATE")
+        val filter = IntentFilter().apply {
+            addAction("com.courier.notifier.LOG_UPDATE")
+            addAction("com.courier.notifier.STATS_UPDATE")
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(logReceiver, filter, RECEIVER_EXPORTED)
         } else {
@@ -134,10 +155,10 @@ class MainActivity : AppCompatActivity() {
     private fun updateServiceStatusBadge() {
         val isEnabled = isAccessibilityServiceEnabled()
         if (isEnabled) {
-            tvStatusBadge.text = "🟢 Служба активна"
+            tvStatusBadge.text = "🟢 Активен"
             tvStatusBadge.setTextColor(Color.parseColor("#10B981"))
         } else {
-            tvStatusBadge.text = "🔴 Служба выключена"
+            tvStatusBadge.text = "🔴 Выключен"
             tvStatusBadge.setTextColor(Color.parseColor("#F43F5E"))
         }
     }
