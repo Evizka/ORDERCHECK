@@ -2,22 +2,24 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0F172A"
+    android:background="#070B14"
     android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:padding="18dp">
 
-        <!-- Header Bar -->
+        <!-- iOS Glass Header -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/bg_glass_card"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:layout_marginBottom="16dp">
+            android:padding="16dp"
+            android:layout_marginBottom="14dp">
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -28,7 +30,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="⚡ Courier Monitor Pro"
+                    android:text="⚡ Courier Monitor"
                     android:textColor="#F8FAFC"
                     android:textSize="22sp"
                     android:textStyle="bold" />
@@ -36,36 +38,37 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Достависта Сканер • v2.0.0"
-                    android:textColor="#94A3B8"
-                    android:textSize="12sp" />
+                    android:text="iOS Glass Edition • v3.0.0"
+                    android:textColor="#38BDF8"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
             </LinearLayout>
 
             <TextView
                 android:id="@+id/tv_status_badge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_card_glass"
+                android:background="@drawable/bg_glass_stat"
                 android:paddingHorizontal="12dp"
-                android:paddingVertical="6dp"
+                android:paddingVertical="8dp"
                 android:text="🔴 Выключен"
                 android:textColor="#F43F5E"
                 android:textSize="12sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Stats Grid (4 Cards) -->
+        <!-- Stats Grid (4 Pills) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="14dp">
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/bg_stat_box"
+                android:background="@drawable/bg_glass_card"
                 android:orientation="vertical"
                 android:padding="12dp"
                 android:layout_marginEnd="6dp">
@@ -73,7 +76,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="📊 Найдено"
+                    android:text="📊 Заказы"
                     android:textColor="#94A3B8"
                     android:textSize="11sp" />
 
@@ -83,7 +86,7 @@
                     android:layout_height="wrap_content"
                     android:text="0"
                     android:textColor="#F8FAFC"
-                    android:textSize="20sp"
+                    android:textSize="22sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -91,7 +94,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/bg_stat_box"
+                android:background="@drawable/bg_glass_card"
                 android:orientation="vertical"
                 android:padding="12dp"
                 android:layout_marginStart="6dp">
@@ -99,7 +102,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="💰 Макс. Оплата"
+                    android:text="💎 Макс. Оплата"
                     android:textColor="#94A3B8"
                     android:textSize="11sp" />
 
@@ -109,8 +112,189 @@
                     android:layout_height="wrap_content"
                     android:text="0 ₽"
                     android:textColor="#34D399"
-                    android:textSize="20sp"
+                    android:textSize="22sp"
                     android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Preset Quick Street Chips Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_glass_card"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginBottom="14dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="⚡ Быстрые шаблоны улиц (1-тап)"
+                android:textColor="#38BDF8"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="10dp" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/chip_molodezhnaya"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_chip"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="8dp"
+                        android:text="+ Молодежная 54"
+                        android:textColor="#38BDF8"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:id="@+id/chip_khimki"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_chip"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="8dp"
+                        android:text="+ Химки"
+                        android:textColor="#38BDF8"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:id="@+id/chip_kurkino"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_chip"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="8dp"
+                        android:text="+ Куркино"
+                        android:textColor="#38BDF8"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:id="@+id/chip_putilkovo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_chip"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="8dp"
+                        android:text="+ Путилково"
+                        android:textColor="#38BDF8"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </HorizontalScrollView>
+        </LinearLayout>
+
+        <!-- Filters Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_glass_card"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginBottom="14dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🎯 Настройка фильтров"
+                android:textColor="#818CF8"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Базовые улицы (через запятую)"
+                android:textColor="#94A3B8"
+                android:textSize="12sp" />
+
+            <EditText
+                android:id="@+id/et_base_address"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_input"
+                android:hint="Молодежная 54, Химки, Куркино"
+                android:textColorHint="#475569"
+                android:textColor="#F8FAFC"
+                android:paddingHorizontal="12dp"
+                android:inputType="text"
+                android:textSize="14sp"
+                android:layout_marginBottom="12dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="6dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Радиус (км)"
+                        android:textColor="#94A3B8"
+                        android:textSize="12sp" />
+
+                    <EditText
+                        android:id="@+id/et_max_radius"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_input"
+                        android:hint="5.0"
+                        android:textColorHint="#475569"
+                        android:textColor="#F8FAFC"
+                        android:paddingHorizontal="12dp"
+                        android:inputType="numberDecimal"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="6dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Мин. цена (руб)"
+                        android:textColor="#94A3B8"
+                        android:textSize="12sp" />
+
+                    <EditText
+                        android:id="@+id/et_min_price"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_input"
+                        android:hint="300"
+                        android:textColorHint="#475569"
+                        android:textColor="#F8FAFC"
+                        android:paddingHorizontal="12dp"
+                        android:inputType="number"
+                        android:textSize="14sp" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 
@@ -118,15 +302,15 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_card_glass"
+            android:background="@drawable/bg_glass_card"
             android:orientation="vertical"
             android:padding="16dp"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="14dp">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="🤖 Telegram Интеграция"
+                android:text="🤖 Telegram Бот"
                 android:textColor="#38BDF8"
                 android:textSize="16sp"
                 android:textStyle="bold"
@@ -172,142 +356,92 @@
                 android:textSize="14sp" />
         </LinearLayout>
 
-        <!-- Filters Card -->
+        <!-- Save Action Button -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_save"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:background="@drawable/bg_button_ios_primary"
+            android:text="💾 Сохранить конфигурацию"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="14dp" />
+
+        <!-- Test Suite Panel -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_card_glass"
+            android:background="@drawable/bg_glass_card"
             android:orientation="vertical"
-            android:padding="16dp"
-            android:layout_marginBottom="20dp">
+            android:padding="14dp"
+            android:layout_marginBottom="14dp">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="🎯 Фильтры Заказов"
-                android:textColor="#818CF8"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="12dp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Базовые улицы (через запятую)"
+                android:text="🧪 Проверка каналов связи"
                 android:textColor="#94A3B8"
-                android:textSize="12sp" />
-
-            <EditText
-                android:id="@+id/et_base_address"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:background="@drawable/bg_input"
-                android:hint="Молодежная 54, Химки, Куркино"
-                android:textColorHint="#475569"
-                android:textColor="#F8FAFC"
-                android:paddingHorizontal="12dp"
-                android:inputType="text"
-                android:textSize="14sp"
-                android:layout_marginBottom="12dp" />
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="10dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <LinearLayout
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btn_test_tg"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="44dp"
                     android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginEnd="8dp">
+                    android:background="@drawable/bg_button_ios_secondary"
+                    android:text="🤖 ТГ Тест"
+                    android:textColor="#E2E8F0"
+                    android:textSize="13sp"
+                    android:layout_marginEnd="4dp" />
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Макс. радиус (км)"
-                        android:textColor="#94A3B8"
-                        android:textSize="12sp" />
-
-                    <EditText
-                        android:id="@+id/et_max_radius"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:background="@drawable/bg_input"
-                        android:hint="5.0"
-                        android:textColorHint="#475569"
-                        android:textColor="#F8FAFC"
-                        android:paddingHorizontal="12dp"
-                        android:inputType="numberDecimal"
-                        android:textSize="14sp" />
-                </LinearLayout>
-
-                <LinearLayout
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btn_test_sound"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="44dp"
                     android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginStart="8dp">
+                    android:background="@drawable/bg_button_ios_secondary"
+                    android:text="🔊 Звук"
+                    android:textColor="#E2E8F0"
+                    android:textSize="13sp"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp" />
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Мин. цена (руб)"
-                        android:textColor="#94A3B8"
-                        android:textSize="12sp" />
-
-                    <EditText
-                        android:id="@+id/et_min_price"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:background="@drawable/bg_input"
-                        android:hint="300"
-                        android:textColorHint="#475569"
-                        android:textColor="#F8FAFC"
-                        android:paddingHorizontal="12dp"
-                        android:inputType="number"
-                        android:textSize="14sp" />
-                </LinearLayout>
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btn_test_vibe"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_button_ios_secondary"
+                    android:text="📳 Вибро"
+                    android:textColor="#E2E8F0"
+                    android:textSize="13sp"
+                    android:layout_marginStart="4dp" />
             </LinearLayout>
         </LinearLayout>
-
-        <!-- Actions -->
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btn_save"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:background="@drawable/bg_button_primary"
-            android:text="💾 Сохранить настройки"
-            android:textColor="#FFFFFF"
-            android:textSize="15sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="10dp" />
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btn_test"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:background="@drawable/bg_button_secondary"
-            android:text="🧪 Тест Telegram сообщения"
-            android:textColor="#E2E8F0"
-            android:textSize="14sp"
-            android:layout_marginBottom="10dp" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_open_accessibility"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:background="@drawable/bg_button_secondary"
+            android:background="@drawable/bg_button_ios_secondary"
             android:text="⚙️ Включить службу в настройках Android"
             android:textColor="#E2E8F0"
             android:textSize="14sp"
-            android:layout_marginBottom="24dp" />
+            android:layout_marginBottom="18dp" />
 
         <!-- Console Section -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="📟 Сканер экрана Достависта (Консоль):"
+            android:text="📟 Логи сканера Достависта (Консоль):"
             android:textColor="#94A3B8"
             android:textSize="13sp"
             android:textStyle="bold"
@@ -323,14 +457,14 @@
             android:textSize="12sp"
             android:fontFamily="monospace"
             android:scrollbars="vertical"
-            android:text="[--:--:--] Монитор сканирования готов...\n" />
+            android:text="[--:--:--] iOS Glass Monitor готов к сканированию...\n" />
 
         <!-- Footer Version -->
         <TextView
             android:id="@+id/tv_app_version"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="v2.0.0 (Build 6) • Courier Monitor Pro"
+            android:text="v3.0.0 (Build 7) • Courier Monitor iOS Glass Edition"
             android:textColor="#64748B"
             android:textSize="12sp"
             android:gravity="center"
