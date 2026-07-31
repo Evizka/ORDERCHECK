@@ -6,6 +6,7 @@ plugins {
 android {
     namespace = "com.courier.notifier"
     compileSdk = 34
+    buildToolsVersion = "34.0.0"
 
     defaultConfig {
         applicationId = "com.courier.notifier"
